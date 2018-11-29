@@ -341,7 +341,7 @@ function initLetters(){
  * @returns {String} HTML formatted image.
  */
 function toImage(sLetter){
-	return "<img src=\"img/AUS_" + sLetter + ".jpg\"/>";
+	return "<img src=\"img/letter_" + sLetter + ".jpg\"/>";
 }
 
 window.onkeyup = function(e) {
