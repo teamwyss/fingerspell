@@ -129,6 +129,8 @@ function trace(sOut){
  */
 function bufferWord(){
 	var sWordCurr = g_sWordCurrent;
+	var asLetters = getLetterArrayFromWord(g_sWordCurrent);
+	cacheLetterImagesOnScreen(asLetters);
 	g_iFrameCurrent = 0;
 	g_asFramePics = new Array();
 	g_aiFrameTimes = new Array();
@@ -172,6 +174,13 @@ function bufferWord(){
 		sOut += "<br/>letter: " + g_asFramePics[iWL] + " will show for " + g_aiFrameTimes[iWL] + " millis";
 	}
 	trace(sOut);
+}
+function getLetterArrayFromWord(sWord) {
+	var asOut = [];
+	for (var i = 0; i < sWord.length; i++) {
+		asOut.push(sWord.charAt(i));
+	}
+	return asOut;
 }
 /**
  * Initialize the animation.
@@ -326,9 +335,17 @@ function showStartInfo(){
  * other functions.
  */
 function initLetters(){
-	var sOut = "";
 	var sLetters = "a,b,c,d,e,f,g,h0,h1,h2,h3,h4,i,j0,j1,j2,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,_";
 	var asLetters = sLetters.split(",");
+	cacheLetterImagesOnScreen(asLetters);
+}
+/**
+ * Draw the letters in the cache div
+ * @param asLetters
+ * @returns
+ */
+function cacheLetterImagesOnScreen(asLetters) {
+	var sOut = "";
 	for (var iL = 0; iL < asLetters.length; iL++) {
 		sOut += toImage(asLetters[iL]);
 	}
