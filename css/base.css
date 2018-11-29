@@ -28,7 +28,9 @@ body {
 	position: relative;
 }
 #imgBuffer img {
-	width: 51px;
+	width: 1px;
+	font-size: 1pt;
+	opacity: 0.1;
 }
 .buttonFunction, .buttonFunctionOff {
 	position: absolute;
