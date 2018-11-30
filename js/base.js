@@ -177,8 +177,15 @@ function bufferWord(){
 }
 function getLetterArrayFromWord(sWord) {
 	var asOut = [];
-	for (var i = 0; i < sWord.length; i++) {
-		asOut.push(sWord.charAt(i));
+	for (var iChar = 0; iChar < sWord.length; iChar++) {
+		var cTemp = sWord.charAt(iChar);
+		if ((cTemp == 'h') || (cTemp == 'j')) {
+			for (var iHJ = 0; iHJ <= 4; iHJ++) {
+				asOut.push(cTemp + iHJ);
+			}			
+		} else {
+			asOut.push(cTemp);
+		}
 	}
 	return asOut;
 }

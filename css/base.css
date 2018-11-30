@@ -28,8 +28,8 @@ body {
 	position: relative;
 }
 #imgBuffer img {
-	width: 1px;
 	font-size: 1pt;
+	width: 1px;
 	opacity: 0.1;
 }
 .buttonFunction, .buttonFunctionOff {
