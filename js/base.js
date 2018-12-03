@@ -2,7 +2,7 @@
 var g_isDebug = false;
 
 var g_aiSpeeds = [2400,1800,1400,1100,900,700,500,300,180]; // Millis to show letter.
-var g_ixSpeed = 4; // Index of the speed settings.
+var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
 var g_ixWordCurrent = -1; // Which word in which word-list. Reset when starting;
@@ -72,7 +72,7 @@ function changeSpeed(iDiff){
  */
 function resumeSettings(){
 	// Resume Speed from cookie via its ix.
-	g_ixSpeed = getCookieAsInt(g_sIxSpeedCookieName, 4);
+	g_ixSpeed = getCookieAsInt(g_sIxSpeedCookieName, g_ixSpeed);
 	g_ixSpeed = Math.min((g_aiSpeeds.length - 1), g_ixSpeed);
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
@@ -263,6 +263,7 @@ function doClickRepeat(){
  * animation, or go to next word.
  */
 function doClickForward(){
+	peekNextWord();
 	if((g_phase == PHASE_INIT) || (g_phase == PHASE_ANSWER)){
 		// It is just started or we are looking at the answer.
 		document.getElementById("buttonRepeat").className = "buttonFunction";
@@ -302,22 +303,38 @@ function showAnswer(sAnswer){
  * @returns Next word, after updating all the array pointers to
  * word lists, and the words in them.
  */
-function getNextWord(){
-	g_ixWordCurrent++;
-	if(g_ixWordCurrent >= g_asWordList.length){
-		// Need to move to next list.
-		g_ixWordCurrent = 0;
-		g_ixWordListCurrent++;
-		if(g_ixWordListCurrent >= aasWordLists.length){
-			g_ixWordListCurrent = 0;
-		}
-		g_asWordList = aasWordLists[g_ixWordListCurrent];
-		// We have changed word lists, update the list cookie.
-		setCookie(g_sIxWordListCookieName, g_ixWordListCurrent);
+function peekNextWord(){
+	cacheLetterImagesOnScreen(getLetterArrayFromWord(getNextWord(false)));
+}
+function getNextWord(isUpdatePosition){
+	if (typeof isUpdatePosition == "undefined") {
+		isUpdatePosition = true;
 	}
-	g_sWordCurrent = g_asWordList[g_ixWordCurrent];
-	setCookie(g_sIxWordCookieName, g_ixWordCurrent);
-	return g_sWordCurrent;
+	var ixWordUpdated = g_ixWordCurrent + 1;
+	var ixWordListUpdated = g_ixWordListCurrent;
+	var asWordListUpdated = g_asWordList;
+	if(ixWordUpdated >= asWordListUpdated.length){
+		// Need to move to next list.
+		ixWordUpdated = 0;
+		ixWordListUpdated = ixWordListUpdated + 1;
+		if(ixWordListUpdated >= aasWordLists.length){
+			ixWordListUpdated = 0;
+		}
+		asWordListUpdated = aasWordLists[ixWordListUpdated];
+		// We have changed word lists, update the list cookie.
+		if (isUpdatePosition) {
+			g_asWordList = asWordListUpdated;
+			setCookie(g_sIxWordListCookieName, ixWordListUpdated);
+		}
+	}
+	var sWordCurrent = asWordListUpdated[ixWordUpdated];
+	if (isUpdatePosition) {
+		g_ixWordCurrent = ixWordUpdated;
+		g_ixWordListCurrent = ixWordListUpdated;
+		g_sWordCurrent = g_asWordList[g_ixWordCurrent];
+		setCookie(g_sIxWordCookieName, g_ixWordCurrent);
+	}
+	return sWordCurrent;
 }
 /**
  * Get the lists prepared.
@@ -340,12 +357,13 @@ function showStartInfo(){
 /**
  * Prepare the alphabet letters, so that they are easily obtained by
  * other functions.
- */
+ * Not used anymore, because peek function was created.
 function initLetters(){
 	var sLetters = "a,b,c,d,e,f,g,h0,h1,h2,h3,h4,i,j0,j1,j2,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,_";
 	var asLetters = sLetters.split(",");
 	cacheLetterImagesOnScreen(asLetters);
 }
+ */
 /**
  * Draw the letters in the cache div
  * @param asLetters
@@ -413,7 +431,8 @@ function doOnLoad(){
 	// Initialize display.
 	displaySpeed();
 	initWordList();
-	initLetters();
+	//initLetters();
+	peekNextWord();
 	// Run any debugging stuff.
 	if(g_isDebug){
 		trace("doOnLoad() :: loading page");
