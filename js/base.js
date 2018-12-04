@@ -154,9 +154,9 @@ function bufferWord(){
 		// if the letter is animated.
 		var asFramePicsForThisLetter = [cCurr];
 		if(cCurr == 'h'){
-			asFramePicsForThisLetter = "h0,h1,h2,h3,h4,h4,h4".split(",");
+			asFramePicsForThisLetter = ["h0","h1","h2","h3","h4","h4","h4"];
 		} else if(cCurr == 'j'){
-			asFramePicsForThisLetter = "j0,j1,j2,j2,j2".split(",");
+			asFramePicsForThisLetter = ["j0","j1","j2","j2","j2"];
 		}
 		var iNumberOfParts = asFramePicsForThisLetter.length;
 		var iSpeedPart = Math.round(g_iSpeed / iNumberOfParts);
@@ -167,13 +167,16 @@ function bufferWord(){
 		}
 	}
 	g_asFramePics[g_asFramePics.length] = "-";
+	g_aiFrameTimes[0] = Math.max(g_aiFrameTimes[0], 500);
 	g_aiFrameTimes[g_aiFrameTimes.length] = 0;
 	g_aiFrameLumin[g_aiFrameLumin.length] = isShowLumin ? 100 : -1; // Past last letter.
-	var sOut = "";
-	for ( var iWL = 0; iWL < g_asFramePics.length; iWL++) {
-		sOut += "<br/>letter: " + g_asFramePics[iWL] + " will show for " + g_aiFrameTimes[iWL] + " millis";
+	if (g_isDebug) {
+		var sOut = "";
+		for ( var iWL = 0; iWL < g_asFramePics.length; iWL++) {
+			sOut += "<br/>letter: " + g_asFramePics[iWL] + " will show for " + g_aiFrameTimes[iWL] + " millis";
+		}
+		trace(sOut);
 	}
-	trace(sOut);
 }
 function getLetterArrayFromWord(sWord) {
 	var asOut = [];
@@ -245,7 +248,10 @@ function showLumin(iLetterToLumin){
  * @param cCurr Letter to show. For example, 'a' will render "...img src=a.gif...".
  */
 function showLetterImage(cCurr){
-	g_divImg.innerHTML = toImage(cCurr);
+	g_divImg.removeChild(g_divImg.firstChild);
+	var img = document.createElement("img");
+	img.setAttribute("src" , "img/letter_" + cCurr + ".jpg");
+	g_divImg.appendChild(img);
 }
 /**
  * User has pressed the repeat button.
