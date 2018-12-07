@@ -76,7 +76,8 @@ function resumeSettings(){
 	g_ixSpeed = Math.min((g_aiSpeeds.length - 1), g_ixSpeed);
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
-	g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, 0);
+	var iRandom = Math.round(Math.random() * 1000) % aasWordLists.length;
+	g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
 	g_ixWordListCurrent = Math.min((aasWordLists.length - 1), g_ixWordListCurrent);
 	// Resume Word from cookie via its ix.
 	var dt = new Date();
