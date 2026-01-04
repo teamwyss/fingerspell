@@ -3,6 +3,7 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>FingerSpell</title>
+<link rel="icon" type="image/png" href="img/favicon.png"/>
 <meta name="viewport" content="initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="css/base.css" />
 <script type="text/javascript" src="js_util/util.Cookie.1.1.js"></script>
@@ -10,11 +11,14 @@
 <script type="text/javascript" src="data/wordLists.js"></script>
 </head>
 <body onload="doOnLoad();">
-<div id="contentWrapper">
+<!--div id="contentWrapper"-->
+<div class="centerer">
 	<div id="imageWrapper" class="wrapper" onclick="doClickForward();">
 		<div id="imgDisplay" class="imgDisplay"></div>
 		<div id="answerDisplay" class=""></div>
 	</div>
+	<!--
+	-->
 	<div id="areaCover" onclick="doClickForward();">&nbsp;</div>
 	<div id="buttonWrapper" class="wrapper">
 		<div id="speedDisplay" class="messageText"></div>
@@ -24,6 +28,19 @@
 		</div>
 		<div id="buttonRepeat" class="buttonFunctionOff" onclick="doClickRepeat();">Repeat</div>
 		<div id="buttonForward" class="buttonFunction" onclick="doClickForward();">Next</div>
+	</div>
+	<div id="scoreboard">
+		<div class="countWrapper">
+		    <div id="countWord" class="mediumText">0</div><br/>
+			<div class="countLabel">words</div>
+		</div>
+		<div class="countWrapper">
+			<div id="countRepeat" class="mediumText">0</div><br/>
+			<div class="countLabel">count</div>
+		</div>
+		<div class="countWrapper">
+			<div id="buttonReset" class="buttonDefault" onclick="scoreboard.reset();">Reset</div>
+		</div>
 	</div>
 </div>
 <div id="debugWrapper" style="position:fixed;top:0;right:0;height:90%;background-color:#88C;display:none;">

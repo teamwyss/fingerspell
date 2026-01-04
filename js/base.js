@@ -8,6 +8,7 @@ var g_ixWordListCurrent = 0; // Which word-list is used
 var g_ixWordCurrent = -1; // Which word in which word-list. Reset when starting;
 var g_asWordList = ["not set"]; // List of words to show. Exploded from word-list.
 var g_sWordCurrent = g_asWordList[0]; // Current word.
+var g_iWordCurrentRepeats = 0;
 
 var g_iFrameCurrent = 0; // Current animation frame. Could be blank, a letter or part of a letter.
 var g_asFramePics = new Array(); // List of frames to animate, eg ["_", "s", "i", "g", "n"]
@@ -63,7 +64,7 @@ function changeSpeed(iDiff){
 	}
 	if(iRequired == g_ixSpeed){
 		setCookie(g_sIxSpeedCookieName, g_ixSpeed);
-		g_iSpeed = g_aiSpeeds[g_ixSpeed];
+		g_iSpeed = g_aiSpeeds[g_ixSpeed]; // - g_iWordCurrentRepeats];
 		displaySpeed();
 	}
 }
@@ -119,6 +120,7 @@ function trace(sOut){
 		if(typeof sOut != "undefined"){
 			sVal = g_divDebug.innerHTML + sOut + "<br/>";
 		}
+		console.log(sOut);
 		g_divDebug.innerHTML = sVal;
 	}
 }
@@ -160,7 +162,8 @@ function bufferWord(){
 			asFramePicsForThisLetter = ["j0","j1","j2","j2","j2"];
 		}
 		var iNumberOfParts = asFramePicsForThisLetter.length;
-		var iSpeedPart = Math.round(g_iSpeed / iNumberOfParts);
+		// As the g_iWordCurrentRepeats increases, speed gets slower and slower.
+		var iSpeedPart = Math.round((g_iSpeed + (g_iWordCurrentRepeats * 500)) / iNumberOfParts);
 		for ( var iP = 0; iP < iNumberOfParts; iP++) {
 			g_asFramePics[g_asFramePics.length] = asFramePicsForThisLetter[iP];
 			g_aiFrameTimes[g_aiFrameTimes.length] = iSpeedPart;
@@ -218,6 +221,8 @@ function showFrame(){
 	var iNextInterval = g_aiFrameTimes[g_iFrameCurrent];
 	g_intervalLetter = window.setInterval(function(){showFrame()}, iNextInterval);
 	g_iFrameCurrent++;
+
+	//console.log("repeats = " + g_iWordCurrentRepeats);
 }
 /**
  * Hilight the matching letter in answer to what is animating in the pictures
@@ -251,7 +256,7 @@ function showLumin(iLetterToLumin){
 function showLetterImage(cCurr){
 	g_divImg.removeChild(g_divImg.firstChild);
 	var img = document.createElement("img");
-	img.setAttribute("src" , "img/letter_" + cCurr + ".jpg");
+	img.setAttribute("src" , "img/letter_" + cCurr + ".png");
 	g_divImg.appendChild(img);
 }
 /**
@@ -262,14 +267,17 @@ function doClickRepeat(){
 	if(g_phase == PHASE_INIT){
 		return;
 	}
+	g_iWordCurrentRepeats++;
 	animateWord();
 	flashClick(g_btnRepeat);
+    scoreboard.addRepeat();
 }
 /**
- * Move forward. This either means show the answer of the current 
+ * Move forward. This either means show the answer of the current
  * animation, or go to next word.
  */
 function doClickForward(){
+	g_iWordCurrentRepeats = 0;
 	peekNextWord();
 	if((g_phase == PHASE_INIT) || (g_phase == PHASE_ANSWER)){
 		// It is just started or we are looking at the answer.
@@ -283,12 +291,13 @@ function doClickForward(){
 		showAnswer(g_sWordCurrent);
 		g_phase = PHASE_ANSWER;
 		g_btnForward.innerHTML = "Next"
+        scoreboard.addWord();
 	}
 	flashClick(g_btnForward);
 }
 function flashClick(btn){
-	btn.style.backgroundColor = "#849fe0";
-	setTimeout(function(){btn.style.backgroundColor = "white";}, 200);
+	btn.style.backgroundColor = "#bfcfff";
+	setTimeout(function(){btn.style.backgroundColor = "#6C88DD";}, 200);
 }
 function clearCookies(){
 	setCookie(g_sIxSpeedCookieName);
@@ -390,33 +399,92 @@ function cacheLetterImagesOnScreen(asLetters) {
  * @returns {String} HTML formatted image.
  */
 function toImage(sLetter){
-	return "<img src=\"img/letter_" + sLetter + ".jpg\"/>";
+	return "<img src=\"img/letter_" + sLetter + ".png\"/>";
 }
 
-window.onkeyup = function(e) {
-	var key = e.keyCode ? e.keyCode : e.which;
+window.onkeydown = function(evt) {
+	var key = evt.keyCode ? evt.keyCode : evt.which;
 	/*
 	 */
 	if (key == 38) {
 		// up
-		trace("up");
+        evt.preventDefault();
+		//trace("111 up");
 		doClickFaster();
 	} else if (key == 40) {
 		// down
-		trace("down");
+		evt.preventDefault();
+		//trace("111 down");
 		doClickSlower();
 	} else if ((key == 32) || (key == 39)) {
 		// right
-		trace("right or space");
+		evt.preventDefault();
+		//trace("111 right or space");
 		doClickForward();
 	} else if (key == 37) {
 		// left
-		trace("left");
+		evt.preventDefault();
+		//trace("111 left");
 		doClickRepeat();
 	}
 	//trace();
 	trace(key);
 }
+
+window.onkeyup = function(evt) {
+	var key = evt.keyCode ? evt.keyCode : evt.which;
+	/*
+	 */
+	if (key == 38) {
+		// up
+        evt.preventDefault();
+		//trace("222 up");
+	} else if (key == 40) {
+		// down
+		evt.preventDefault();
+		//trace("222 down");
+	} else if ((key == 32) || (key == 39)) {
+		// right
+		evt.preventDefault();
+		//trace("222 right or space");
+	} else if (key == 37) {
+		// left
+		evt.preventDefault();
+		//trace("222 left");
+	}
+	//trace();
+	trace(key);
+}
+
+const scoreboard = {
+    iWords: 0,
+    iRepeats: 0,
+    uiWords: 0,
+    uiRepeats: 0,
+    init: function() {
+        this.uiWords = document.querySelector("#countWord");
+        this.uiRepeats = document.querySelector("#countRepeat");
+        this.updateUi();
+    },
+    addWord: function() {
+        this.iWords++;
+        this.updateUi();
+    },
+    addRepeat: function() {
+        this.iRepeats++;
+        this.updateUi();
+    },
+    reset: function() {
+        this.iWords = 0;
+        this.iRepeats = 0;
+        this.updateUi();
+    },
+    updateUi: function() {
+        this.uiWords.innerHTML = this.iWords;
+        this.uiRepeats.innerHTML = this.iRepeats;
+    }
+}
+
 /**
  * Get it all ready.
  * Set up the ui references get speed from cookie and show speed etc.
@@ -445,4 +513,5 @@ function doOnLoad(){
 		trace("doOnLoad() :: loading page");
 		document.getElementById("debugClearCookies").style.display = "";
 	}
+	scoreboard.init();
 }
