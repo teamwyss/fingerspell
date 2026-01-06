@@ -1,7 +1,8 @@
 
 var g_isDebug = false;
 
-var g_aiSpeeds = [2400,1800,1400,1100,900,700,500,300,180]; // Millis to show letter.
+// speeds            1     2     3     4     5     6     7     8     9
+var g_aiSpeeds = [2400, 1800, 1400, 1100,  900,  700,  500,  400,  300]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
@@ -183,6 +184,7 @@ function bufferWord(){
 	}
 }
 function getLetterArrayFromWord(sWord) {
+	sWord = sWord.toLowerCase();
 	var asOut = [];
 	for (var iChar = 0; iChar < sWord.length; iChar++) {
 		var cTemp = sWord.charAt(iChar);
@@ -416,7 +418,20 @@ window.onkeydown = function(evt) {
 		evt.preventDefault();
 		//trace("111 down");
 		doClickSlower();
-	} else if ((key == 32) || (key == 39)) {
+	} else if (key == 32) {
+		// Space
+		evt.preventDefault();
+		doClickForward();
+		//console.log("g_phase = " +  g_phase)
+		if (g_phase == PHASE_ANSWER) {
+            setTimeout(
+                function() {
+                    doClickForward();
+                },
+                500
+            );
+		}
+	} else if (key == 39) {
 		// right
 		evt.preventDefault();
 		//trace("111 right or space");
@@ -434,6 +449,10 @@ window.onkeydown = function(evt) {
 window.onkeyup = function(evt) {
 	var key = evt.keyCode ? evt.keyCode : evt.which;
 	/*
+	 * This is NOT the function that does the work. THis is here to stop
+	 * default behaviour when key comes up. Only a few need to be trapped.
+	 * Only these ones have an effect on the UI.
+	 * window.onkeydown() does the work.
 	 */
 	if (key == 38) {
 		// up
