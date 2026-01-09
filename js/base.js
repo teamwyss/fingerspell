@@ -370,10 +370,14 @@ function initWordList(){
  * other functions.
  */
 function showStartInfo(){
-	var sOut = "<div class=\"startInfoText\">Click on Next to start...<br><div>Use arrow keys or space to run...</div></div>";
+	var sOut = "<div class=\"startInfoText\">";
+	var sContent = "Click on Next to start...<br><div>Use arrow keys or space to run...</div>";
 	if (g_isMediaW375) {
-	  sOut = "<div class=\"startInfoText\">Click on Next to start...<br><div>Touch image to go next...</div></div>";
+	    sContent = "<div class=\"startInfoText\">Click on Next to start...<br><div>Touch image to go next...</div>";
 	}
+	sContent += "" + window.screen.width;
+	sOut += sContent;
+	sOut += "</div>";
 	g_divImg.innerHTML = sOut;
 }
 /**
@@ -545,5 +549,4 @@ function doOnLoad(){
 		document.getElementById("debugClearCookies").style.display = "";
 	}
 	scoreboard.init();
-
 }
