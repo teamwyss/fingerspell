@@ -366,8 +366,7 @@ function initWordList(){
 	}
 }
 /**
- * Prepare the alphabet letters, so that they are easily obtained by
- * other functions.
+ * Prepare the alphabet letters, so that they are easily obtained by other functions.
  */
 function showStartInfo(){
 	var sOut = "<div class=\"startInfoText\">";
