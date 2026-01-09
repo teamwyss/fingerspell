@@ -104,6 +104,7 @@ div#imgDisplay img {
 	width:192px; /* imgs are 192px */
 	xxxcolor:white;
 	text-align: center;
+	margin: auto;
 }
 #imageWrapper {
 	height: 200px;

@@ -164,7 +164,7 @@ function bufferWord(){
 		}
 		var iNumberOfParts = asFramePicsForThisLetter.length;
 		// As the g_iWordCurrentRepeats increases, speed gets slower and slower.
-		var iSpeedPart = Math.round((g_iSpeed + (g_iWordCurrentRepeats * 500)) / iNumberOfParts);
+		var iSpeedPart = Math.round((g_iSpeed + (Math.max(0, (g_iWordCurrentRepeats - 1)) * 500)) / iNumberOfParts);
 		for ( var iP = 0; iP < iNumberOfParts; iP++) {
 			g_asFramePics[g_asFramePics.length] = asFramePicsForThisLetter[iP];
 			g_aiFrameTimes[g_aiFrameTimes.length] = iSpeedPart;
