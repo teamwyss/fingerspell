@@ -1,5 +1,6 @@
 
 var g_isDebug = false;
+var g_isMediaW375 = false;
 
 // speeds            1     2     3     4     5     6     7     8     9
 var g_aiSpeeds = [2400, 1800, 1400, 1100,  900,  700,  500,  400,  300]; // Millis to show letter.
@@ -370,6 +371,9 @@ function initWordList(){
  */
 function showStartInfo(){
 	var sOut = "<div class=\"startInfoText\">Click on Next to start...<br><div>Use arrow keys or space to run...</div></div>";
+	if (g_isMediaW375) {
+	  sOut = "<div class=\"startInfoText\">Click on Next to start...<br><div>Touch image to go next...</div></div>";
+	}
 	g_divImg.innerHTML = sOut;
 }
 /**
@@ -504,6 +508,14 @@ const scoreboard = {
     }
 }
 
+const mediaQuery = window.matchMedia("(max-width: 768px)");
+function handleMediaQueryChange(event) {
+  // 'event.matches' is a boolean: true if the query matches, false otherwise
+  g_isMediaW375 = (event.matches);
+}
+// Initial check when the script runs
+handleMediaQueryChange(mediaQuery);
+
 /**
  * Get it all ready.
  * Set up the ui references get speed from cookie and show speed etc.
@@ -533,4 +545,5 @@ function doOnLoad(){
 		document.getElementById("debugClearCookies").style.display = "";
 	}
 	scoreboard.init();
+
 }
