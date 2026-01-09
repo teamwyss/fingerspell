@@ -6,13 +6,7 @@
     --color-grey50: #888;
     --color-buttonBg: #6C88DD;
 }
-@media screen and (max-width: 1375px) {
-  /* CSS rules for screens with a maximum width of 375px or less go here */
-  .centerer {
-    border: none !important;
-    background-color: var(--color-blue90) !important;
-  }
-}
+
 * {
 	margin:0;
 	padding:0;
@@ -46,7 +40,7 @@ button, .button {
 }
 .centerer {
     margin: 10px auto;
-    padding: 30px;
+    padding: 0px;
     position: relative;
     background-color: var(--color-blue80);
     border: 1px solid var(--color-grey50);
@@ -199,4 +193,12 @@ div#scoreboard div {
 }
 .countWrapper .countLabel {
     line-height: 14px;
+}
+@media screen and (max-width: 375px) {
+  /* CSS rules for screens with a maximum width of 375px or less go here */
+  .centerer {
+    border: none !important;
+    background-color: var(--color-blue90) !important;
+    width: 100vw;
+  }
 }
