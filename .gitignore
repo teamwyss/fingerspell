@@ -1,3 +1,9 @@
 .DS_Store
 */.DS_Store
 *.bak.*
+.idea/*
+/bin/lettersRaw/*
+/bin/dev/*
+/bin/old/*
+/bin/0.0.mov
+/bin/index.htm
