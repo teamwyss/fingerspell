@@ -3,7 +3,7 @@ var g_isDebug = false;
 var g_isMediaW375 = false;
 
 // speeds            1     2     3     4     5     6     7     8     9
-var g_aiSpeeds = [2400, 1800, 1400, 1100,  900,  700,  500,  400,  300]; // Millis to show letter.
+var g_aiSpeeds = [2000, 1400,  900,  700,  500,  450,  400,  350, 300]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
