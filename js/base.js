@@ -374,7 +374,7 @@ function showStartInfo(){
 	if (g_isMediaW375) {
 	    sContent = "<div class=\"startInfoText\">Click on Next to start...<br><div>Touch image to go next...</div>";
 	}
-	sContent += "" + window.screen.width;
+	//sContent += "" + window.screen.width;
 	sOut += sContent;
 	sOut += "</div>";
 	g_divImg.innerHTML = sOut;
