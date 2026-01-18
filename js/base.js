@@ -17,6 +17,8 @@ var g_asFramePics = new Array(); // List of frames to animate, eg ["_", "s", "i"
 var g_aiFrameTimes = new Array(); // List of the times each letter will show, eg [20, 1000, 1000, 1000, 1000]
 var g_aiFrameLumin = new Array(); // The ix of current letter in answer.
 
+let g_isVowelPractice = false;
+
 var g_intervalLetter; // Window interval to manage timing.
 var g_iPauseDurationMin = 50; // Between double letters pause. This is minimum millis.
 //var g_iPauseDurationMax = 200; // Between double letters pause. This is minimum millis.
@@ -38,6 +40,7 @@ var g_phase = PHASE_INIT;
 var g_sIxSpeedCookieName = "fingerSpell_ixCookieSpeed"; // Marker for ix of users chosen speed.
 var g_sIxWordCookieName = "fingerSpell_ixWord"; // Marker for ix of word-list.
 var g_sIxWordListCookieName = "fingerSpell_ixWordList"; // Marker for ix of word-list.
+var g_sIsVowelPracticeCookieName = "fingerSpell_isVowelPractice"; // Marker for ix of word-list.
 
 /**
  * Make anim run faster.
@@ -79,13 +82,42 @@ function resumeSettings(){
 	g_ixSpeed = Math.min((g_aiSpeeds.length - 1), g_ixSpeed);
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
-	var iRandom = Math.round(Math.random() * 1000) % aasWordLists.length;
-	g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
-	g_ixWordListCurrent = Math.min((aasWordLists.length - 1), g_ixWordListCurrent);
-	// Resume Word from cookie via its ix.
-	var dt = new Date();
-	g_ixWordCurrent = getCookieAsInt(g_sIxWordCookieName, dt.getSeconds());
-	g_ixWordCurrent = Math.min((aasWordLists[g_ixWordListCurrent].length - 1), g_ixWordCurrent);
+	g_isVowelPractice = getCookieAsBool(g_sIsVowelPracticeCookieName, false);
+	if (g_isVowelPractice) {
+	    vowelPractice.init();
+	    aasWordLists = vowelPractice.generateVocab();
+        g_ixWordListCurrent = 0;
+        g_ixWordCurrent = 0;
+        updateButtonStyleToVowelPractice();
+	} else {
+        var iRandom = Math.round(Math.random() * 1000) % aasWordLists.length;
+        g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
+        g_ixWordListCurrent = Math.min((aasWordLists.length - 1), g_ixWordListCurrent);
+        // Resume Word from cookie via its ix.
+        var dt = new Date();
+        g_ixWordCurrent = getCookieAsInt(g_sIxWordCookieName, dt.getSeconds());
+        g_ixWordCurrent = Math.min((aasWordLists[g_ixWordListCurrent].length - 1), g_ixWordCurrent);
+	}
+}
+
+function doClickSwitchVowelPractice(uiSrc) {
+    g_isVowelPractice = !g_isVowelPractice;
+    updateButtonStyleToVowelPractice(uiSrc);
+    setCookie(g_sIsVowelPracticeCookieName, g_isVowelPractice.toString());
+}
+function updateButtonStyleToVowelPractice(uiSrc=null) {
+    if (uiSrc === null) {
+        uiSrc = document.querySelector("#buttonVowelPractice");
+    }
+    uiSrc.className = g_isVowelPractice ? "buttonFunction" : "buttonFunctionOff";
+}
+/**
+ * Search through cookies and return value as an int.
+ * If no value can be safely returned, return the default value.
+ */
+function getCookieAsBool(sCookieName, isDefault){
+	var sIsOut = getCookie(sCookieName);
+	return (sIsOut === "") ? false : (sIsOut == "true");
 }
 /**
  * Search through cookies and return value as an int.
@@ -192,7 +224,9 @@ function getLetterArrayFromWord(sWord) {
 		if ((cTemp == 'h') || (cTemp == 'j')) {
 			for (var iHJ = 0; iHJ <= 4; iHJ++) {
 				asOut.push(cTemp + iHJ);
-			}			
+			}
+		} else if (cTemp == ' ') {
+			asOut.push("_");
 		} else {
 			asOut.push(cTemp);
 		}
@@ -322,8 +356,11 @@ function showAnswer(sAnswer){
  * @returns Next word, after updating all the array pointers to
  * word lists, and the words in them.
  */
-function peekNextWord(){
-	cacheLetterImagesOnScreen(getLetterArrayFromWord(getNextWord(false)));
+function peekNextWord(sWordToPeek=null){
+    if (sWordToPeek === null) {
+        sWordToPeek = getNextWord(false);
+    }
+	cacheLetterImagesOnScreen(getLetterArrayFromWord(sWordToPeek));
 }
 function getNextWord(isUpdatePosition){
 	if (typeof isUpdatePosition == "undefined") {
@@ -541,7 +578,7 @@ function doOnLoad(){
 	displaySpeed();
 	initWordList();
 	//initLetters();
-	peekNextWord();
+	peekNextWord(" abcdefghijklmnopqrstuvwxyz");
 	// Run any debugging stuff.
 	if(g_isDebug){
 		trace("doOnLoad() :: loading page");
