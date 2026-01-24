@@ -17,7 +17,7 @@ var g_asFramePics = new Array(); // List of frames to animate, eg ["_", "s", "i"
 var g_aiFrameTimes = new Array(); // List of the times each letter will show, eg [20, 1000, 1000, 1000, 1000]
 var g_aiFrameLumin = new Array(); // The ix of current letter in answer.
 
-let g_isVowelPractice = false;
+let g_isVocabVowels = false;
 
 var g_intervalLetter; // Window interval to manage timing.
 var g_iPauseDurationMin = 50; // Between double letters pause. This is minimum millis.
@@ -40,7 +40,7 @@ var g_phase = PHASE_INIT;
 var g_sIxSpeedCookieName = "fingerSpell_ixCookieSpeed"; // Marker for ix of users chosen speed.
 var g_sIxWordCookieName = "fingerSpell_ixWord"; // Marker for ix of word-list.
 var g_sIxWordListCookieName = "fingerSpell_ixWordList"; // Marker for ix of word-list.
-var g_sIsVowelPracticeCookieName = "fingerSpell_isVowelPractice"; // Marker for ix of word-list.
+var g_sIsVocabVowelsCookieName = "fingerSpell_isVocabVowels"; // Marker for ix of word-list.
 
 /**
  * Make anim run faster.
@@ -82,13 +82,13 @@ function resumeSettings(){
 	g_ixSpeed = Math.min((g_aiSpeeds.length - 1), g_ixSpeed);
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
-	g_isVowelPractice = getCookieAsBool(g_sIsVowelPracticeCookieName, false);
-	if (g_isVowelPractice) {
-	    vowelPractice.init();
-	    aasWordLists = vowelPractice.generateVocab();
+	g_isVocabVowels = getCookieAsBool(g_sIsVocabVowelsCookieName, false);
+	if (g_isVocabVowels) {
+	    vocabVowels.init();
+	    aasWordLists = vocabVowels.generateVocab();
         g_ixWordListCurrent = 0;
         g_ixWordCurrent = 0;
-        updateButtonStyleToVowelPractice();
+        updateButtonStyleToVocabVowels();
 	} else {
         var iRandom = Math.round(Math.random() * 1000) % aasWordLists.length;
         g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
@@ -100,16 +100,16 @@ function resumeSettings(){
 	}
 }
 
-function doClickSwitchVowelPractice(uiSrc) {
-    g_isVowelPractice = !g_isVowelPractice;
-    updateButtonStyleToVowelPractice(uiSrc);
-    setCookie(g_sIsVowelPracticeCookieName, g_isVowelPractice.toString());
+function doClickSwitchVocabVowels(uiSrc) {
+    g_isVocabVowels = !g_isVocabVowels;
+    updateButtonStyleToVocabVowels(uiSrc);
+    setCookie(g_sIsVocabVowelsCookieName, g_isVocabVowels.toString());
 }
-function updateButtonStyleToVowelPractice(uiSrc=null) {
+function updateButtonStyleToVocabVowels(uiSrc=null) {
     if (uiSrc === null) {
-        uiSrc = document.querySelector("#buttonVowelPractice");
+        uiSrc = document.querySelector("#buttonVocabVowels");
     }
-    uiSrc.className = g_isVowelPractice ? "buttonFunction" : "buttonFunctionOff";
+    uiSrc.className = g_isVocabVowels ? "buttonFunction" : "buttonFunctionOff";
 }
 /**
  * Search through cookies and return value as an int.
@@ -347,7 +347,7 @@ function clearCookies(){
  * @param sAnswer
  */
 function showAnswer(sAnswer){
-	document.getElementById("answerDisplay").innerHTML = sAnswer;
+	document.getElementById("answerDisplay").innerHTML = sAnswer.split("_").join(" ");
 }
 /**
  * Move to next word in word list.
@@ -369,7 +369,7 @@ function getNextWord(isUpdatePosition){
 	var ixWordUpdated = g_ixWordCurrent + 1;
 	var ixWordListUpdated = g_ixWordListCurrent;
 	var asWordListUpdated = g_asWordList;
-	if(ixWordUpdated >= asWordListUpdated.length){
+	if (ixWordUpdated >= asWordListUpdated.length) {
 		// Need to move to next list.
 		ixWordUpdated = 0;
 		ixWordListUpdated = ixWordListUpdated + 1;
@@ -407,7 +407,7 @@ function initWordList(){
  */
 function showStartInfo(){
 	var sOut = "<div class=\"startInfoText\">";
-	var sContent = "Click on Next to start...<br><div>Use arrow keys or space to run...</div>";
+	var sContent = "Click on Next to start...<br/><div>Use arrow keys or space to run...</div>";
 	if (g_isMediaW375) {
 	    sContent = "<div class=\"startInfoText\">Click on Next to start...<br><div>Touch image to go next...</div>";
 	}
@@ -462,8 +462,8 @@ window.onkeydown = function(evt) {
 		evt.preventDefault();
 		//trace("111 down");
 		doClickSlower();
-	} else if (key == 32) {
-		// Space
+	} else if ((key == 32) || (key == 39)) {
+		// 32=space 39=right.
 		evt.preventDefault();
 		doClickForward();
 		//console.log("g_phase = " +  g_phase)
@@ -475,11 +475,11 @@ window.onkeydown = function(evt) {
                 500
             );
 		}
-	} else if (key == 39) {
-		// right
-		evt.preventDefault();
-		//trace("111 right or space");
-		doClickForward();
+    //} else if (key == 39) {
+    //    // right
+    //    evt.preventDefault();
+    //    //trace("111 right or space");
+    //    doClickForward();
 	} else if (key == 37) {
 		// left
 		evt.preventDefault();
@@ -498,7 +498,10 @@ window.onkeyup = function(evt) {
 	 * Only these ones have an effect on the UI.
 	 * window.onkeydown() does the work.
 	 */
-	if (key == 38) {
+	if ([32,37,38,39,40].includes(key)) {
+        evt.preventDefault();
+	}
+	/*if (key == 38) {
 		// up
         evt.preventDefault();
 		//trace("222 up");
@@ -514,7 +517,7 @@ window.onkeyup = function(evt) {
 		// left
 		evt.preventDefault();
 		//trace("222 left");
-	}
+	}*/
 	//trace();
 	trace(key);
 }

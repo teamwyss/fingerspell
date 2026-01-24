@@ -1,4 +1,4 @@
-const vowelPractice = {
+const vocabVowels = {
     vocab: [],
     iWordLength: 12,
     init: function() {
@@ -7,7 +7,7 @@ const vowelPractice = {
     },
     generateVocab: function() {
         let asOut = [];
-        let sChars = this.getShuffledListOfChars(360);
+        let sChars = this.__getShuffledListOfChars__(360);
         let iRemain  = sChars.length;
         while (iRemain > 0) {
             let iGrab = Math.min(iRemain, this.iWordLength);
@@ -18,8 +18,8 @@ const vowelPractice = {
         }
         return [asOut];
     },
-    getShuffledListOfChars: function(iCharCountOut) {
-        let sOut = "ueoieoueauiouaoiueiuoeiouaioueuoieuoeauiouaoieiuoeiouaioueuoieoeaiouaoiue";
+    __getShuffledListOfChars__: function(iCharCountOut) {
+        let sOut = "ueoieoueauiouaoiueiuoeiuouaiaoueuoieuoeauiouaoieiuoeoiuaioueuoieoeaiaouaoiue";
         while (sOut.length < iCharCountOut) {
             // Make sure it is at least as long.
             sOut += sOut;
@@ -28,7 +28,7 @@ const vowelPractice = {
         sOut = sOut.substring(0, iCharCountOut);
         return sOut;
     },
-    getShuffledListOfCharsComputeLiveRandom: function(iCharCountOut) {
+    __getShuffledListOfCharsComputeLiveRandom__: function(iCharCountOut) {
         /*                                                                  *
         *  This works great, but so much easier to use a seed like above.   *
         *  Keeping this because it has a great randomising function.        *
@@ -36,7 +36,7 @@ const vowelPractice = {
         let acOut = "aaaeeeeeiiiiiiioooooooooouuu".split("");
         let currentIndex = acOut.length;
 
-        // While there remain elements to getShuffledListOfChars...
+        // While there remain elements to __getShuffledListOfChars__...
         while (currentIndex != 0) {
             // Pick a remaining element...
             let randomIndex = Math.floor(Math.random() * currentIndex);
