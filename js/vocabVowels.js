@@ -16,7 +16,7 @@ const vocabVowels = {
             sChars = sChars.substring(iGrab);
             asOut.push(sThis);
         }
-        return [asOut];
+        return asOut;
     },
     __getShuffledListOfChars__: function(iCharCountOut) {
         let sOut = "ueoieoueauiouaoiueiuoeiuouaiaoueuoieuoeauiouaoieiuoeoiuaioueuoieoeaiaouaoiue";

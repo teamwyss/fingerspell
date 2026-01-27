@@ -3,13 +3,14 @@ var g_isDebug = false;
 var g_isMediaW375 = false;
 
 // speeds            1     2     3     4     5     6     7     8     9
-var g_aiSpeeds = [2000, 1400,  900,  700,  500,  450,  400,  350, 300]; // Millis to show letter.
+var g_aiSpeeds = [2000, 1400,  900,  700,  500,  450,  400,  350,  300]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
 var g_ixWordCurrent = -1; // Which word in which word-list. Reset when starting;
-var g_asWordList = ["not set"]; // List of words to show. Exploded from word-list.
-var g_sWordCurrent = g_asWordList[0]; // Current word.
+//var g_asWordList = ["not set"]; // List of words to show. Exploded from word-list.
+const vocab = vocabEng;
+var g_sWordCurrent = vocab.asList[0]; // Current word.
 var g_iWordCurrentRepeats = 0;
 
 var g_iFrameCurrent = 0; // Current animation frame. Could be blank, a letter or part of a letter.
@@ -23,14 +24,16 @@ var g_intervalLetter; // Window interval to manage timing.
 var g_iPauseDurationMin = 50; // Between double letters pause. This is minimum millis.
 //var g_iPauseDurationMax = 200; // Between double letters pause. This is minimum millis.
 
-var g_divBuffer; // Invisible area to buffer/cache images.
-var g_divDebug; // Developer debug area receiving trace messages.
-var g_divSpeed; // Display of the current speed, eg "5".
-var g_divImg; // Main letter image area.
-var g_btnForward; // Forward button. Needs a reference because face value changes.
-var g_btnFaster; // Back button.
-var g_btnSlower; // Down button.
-var g_btnRepeat; // Left button.
+const ui = {
+    divBuffer: null, // Invisible area to buffer/cache images.
+    divDebug: null, // Developer debug area receiving trace messages.
+    divSpeed: null, // Display of the current speed, eg "5".
+    divImg: null, // Main letter image area.
+    btnForward: null, // Forward button. Needs a reference because face value changes.
+    btnFaster: null, // Back button.
+    btnSlower: null, // Down button.
+    btnRepeat: null // Left button.
+}
 
 var PHASE_INIT = 0; // Just loaded, no action yet. No repeat possible.
 var PHASE_ANIM = 1; // Running the animation.
@@ -39,22 +42,63 @@ var g_phase = PHASE_INIT;
 
 var g_sIxSpeedCookieName = "fingerSpell_ixCookieSpeed"; // Marker for ix of users chosen speed.
 var g_sIxWordCookieName = "fingerSpell_ixWord"; // Marker for ix of word-list.
-var g_sIxWordListCookieName = "fingerSpell_ixWordList"; // Marker for ix of word-list.
+//var g_sIxWordListCookieName = "fingerSpell_ixWordList"; // Marker for ix of word-list.
 var g_sIsVocabVowelsCookieName = "fingerSpell_isVocabVowels"; // Marker for ix of word-list.
+var oVocab = null;
+
+const oCookie = {
+    _sCookieName_: "fingerspellSession",
+    cache: {},
+    init: function() {
+    	var sCache = getCookie(this._sCookieName_);
+    	if (sCache === "") {
+    	    this.cache = {};
+    	} else {
+    	    this.cache = JSON.parse(sCache);
+    	}
+        return this;
+    },
+    setIxSpeed: function(ixSpeed) {
+        this.set("ixSpeed", ixSpeed);
+    },
+    getIxSpeed: function(ixDefault) {
+        return this.get("ixSpeed", ixDefault);
+    },
+    setIdVocab: function(sIdVocab) {
+        this.set("sIdVocab", sIdVocab);
+    },
+    getIdVocab: function(sDefault="vocabEng") {
+        return this.get("sIdVocab", sDefault);
+    },
+    set: function(sAttr, vValue) {
+        this.cache[sAttr] = vValue; // Update cache.
+        let sCache = JSON.stringify(this.cache);
+        setCookie(this._sCookieName_, sCache);
+    },
+    get: function(sAttr, vDefault=null) {
+        if (this.cache.hasOwnProperty(sAttr)) {
+            return this.cache[sAttr];
+        }
+        return vDefault;
+    },
+	deleteAll: function() {
+        setCookie(this._sCookieName_);
+	}
+}
 
 /**
  * Make anim run faster.
  */
 function doClickFaster(){
 	changeSpeed(1);
-	flashClick(g_btnFaster);
+	flashClick(ui.btnFaster);
 }
 /**
  * Make animm run slower.
  */
 function doClickSlower(){
 	changeSpeed(-1);
-	flashClick(g_btnSlower);
+	flashClick(ui.btnSlower);
 }
 /**
  * User want to speed up or slow down.
@@ -69,7 +113,8 @@ function changeSpeed(iDiff){
 	}
 	if(iRequired == g_ixSpeed){
 		setCookie(g_sIxSpeedCookieName, g_ixSpeed);
-		g_iSpeed = g_aiSpeeds[g_ixSpeed]; // - g_iWordCurrentRepeats];
+		oCookie.setIxSpeed(g_ixSpeed);
+		g_iSpeed = g_aiSpeeds[g_ixSpeed];
 		displaySpeed();
 	}
 }
@@ -78,25 +123,25 @@ function changeSpeed(iDiff){
  */
 function resumeSettings(){
 	// Resume Speed from cookie via its ix.
-	g_ixSpeed = getCookieAsInt(g_sIxSpeedCookieName, g_ixSpeed);
+	g_ixSpeed = oCookie.getIxSpeed(g_ixSpeed);
 	g_ixSpeed = Math.min((g_aiSpeeds.length - 1), g_ixSpeed);
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
 	g_isVocabVowels = getCookieAsBool(g_sIsVocabVowelsCookieName, false);
 	if (g_isVocabVowels) {
 	    vocabVowels.init();
-	    aasWordLists = vocabVowels.generateVocab();
-        g_ixWordListCurrent = 0;
+	    vocab.asList = vocabVowels.generateVocab();
+//        g_ixWordListCurrent = 0;
         g_ixWordCurrent = 0;
         updateButtonStyleToVocabVowels();
 	} else {
-        var iRandom = Math.round(Math.random() * 1000) % aasWordLists.length;
-        g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
-        g_ixWordListCurrent = Math.min((aasWordLists.length - 1), g_ixWordListCurrent);
+        var iRandom = Math.round(Math.random() * 1000) % vocab.asList.length;
+//        g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
+//        g_ixWordListCurrent = Math.min((vocab.asList.length - 1), g_ixWordListCurrent);
         // Resume Word from cookie via its ix.
         var dt = new Date();
         g_ixWordCurrent = getCookieAsInt(g_sIxWordCookieName, dt.getSeconds());
-        g_ixWordCurrent = Math.min((aasWordLists[g_ixWordListCurrent].length - 1), g_ixWordCurrent);
+        g_ixWordCurrent = Math.min((vocab.asList.length - 1), g_ixWordCurrent);
 	}
 }
 
@@ -142,7 +187,7 @@ function getCookieAsInt(sCookieName, iDefault){
  * Present the users speed on the screen.
  */
 function displaySpeed(){
-	g_divSpeed.innerHTML = (g_ixSpeed + 1);
+	ui.divSpeed.innerHTML = (g_ixSpeed + 1);
 }
 /**
  * Debugging message.
@@ -152,10 +197,10 @@ function trace(sOut){
 	if(g_isDebug){
 		var sVal = "";
 		if(typeof sOut != "undefined"){
-			sVal = g_divDebug.innerHTML + sOut + "<br/>";
+			sVal = ui.divDebug.innerHTML + sOut + "<br/>";
 		}
 		console.log(sOut);
-		g_divDebug.innerHTML = sVal;
+		ui.divDebug.innerHTML = sVal;
 	}
 }
 /**
@@ -291,10 +336,11 @@ function showLumin(iLetterToLumin){
  * @param cCurr Letter to show. For example, 'a' will render "...img src=a.gif...".
  */
 function showLetterImage(cCurr){
-	g_divImg.removeChild(g_divImg.firstChild);
+    cCurr.split(" ").join("_");
+	ui.divImg.removeChild(ui.divImg.firstChild);
 	var img = document.createElement("img");
 	img.setAttribute("src" , "img/letter_" + cCurr + ".png");
-	g_divImg.appendChild(img);
+	ui.divImg.appendChild(img);
 }
 /**
  * User has pressed the repeat button.
@@ -306,7 +352,7 @@ function doClickRepeat(){
 	}
 	g_iWordCurrentRepeats++;
 	animateWord();
-	flashClick(g_btnRepeat);
+	flashClick(ui.btnRepeat);
     scoreboard.addRepeat();
 }
 /**
@@ -323,23 +369,23 @@ function doClickForward(){
 		getNextWord();
 		showAnswer("");
 		animateWord();
-		g_btnForward.innerHTML = "Answer";
+		ui.btnForward.innerHTML = "Answer";
 	} else {
 		showAnswer(g_sWordCurrent);
 		g_phase = PHASE_ANSWER;
-		g_btnForward.innerHTML = "Next"
+		ui.btnForward.innerHTML = "Next"
         scoreboard.addWord();
 	}
-	flashClick(g_btnForward);
+	flashClick(ui.btnForward);
 }
 function flashClick(btn){
 	btn.style.backgroundColor = "#bfcfff";
 	setTimeout(function(){btn.style.backgroundColor = "#6C88DD";}, 200);
 }
 function clearCookies(){
-	setCookie(g_sIxSpeedCookieName);
+	oCookie.deleteAll();
 	setCookie(g_sIxWordCookieName);
-	setCookie(g_sIxWordListCookieName);
+	//setCookie(g_sIxWordListCookieName);
 	document.location = document.location.href;
 }
 /**
@@ -362,32 +408,32 @@ function peekNextWord(sWordToPeek=null){
     }
 	cacheLetterImagesOnScreen(getLetterArrayFromWord(sWordToPeek));
 }
-function getNextWord(isUpdatePosition){
-	if (typeof isUpdatePosition == "undefined") {
-		isUpdatePosition = true;
-	}
+function getNextWord(isUpdatePosition=true) {
+//	if (typeof isUpdatePosition == "undefined") {
+//		isUpdatePosition = true;
+//	}
 	var ixWordUpdated = g_ixWordCurrent + 1;
-	var ixWordListUpdated = g_ixWordListCurrent;
-	var asWordListUpdated = g_asWordList;
-	if (ixWordUpdated >= asWordListUpdated.length) {
+	//var ixWordListUpdated = g_ixWordListCurrent;
+	//var asWordListUpdated = vocab.asList;
+//	if (ixWordUpdated >= asWordListUpdated.length) {
+	if (ixWordUpdated >= vocab.asList.length) {
 		// Need to move to next list.
 		ixWordUpdated = 0;
-		ixWordListUpdated = ixWordListUpdated + 1;
-		if(ixWordListUpdated >= aasWordLists.length){
-			ixWordListUpdated = 0;
-		}
-		asWordListUpdated = aasWordLists[ixWordListUpdated];
+		//ixWordListUpdated = ixWordListUpdated + 1;
+		//if(ixWordListUpdated >= vocab.asList.length){
+		//	ixWordListUpdated = 0;
+		//}
+		//asWordListUpdated = vocab.asList[ixWordListUpdated];
 		// We have changed word lists, update the list cookie.
-		if (isUpdatePosition) {
-			g_asWordList = asWordListUpdated;
-			setCookie(g_sIxWordListCookieName, ixWordListUpdated);
-		}
+		//if (isUpdatePosition) {
+		//	vocab.asList = asWordListUpdated;
+		//setCookie(g_sIxWordListCookieName, ixWordListUpdated);
 	}
-	var sWordCurrent = asWordListUpdated[ixWordUpdated];
+	var sWordCurrent = vocab.asList[ixWordUpdated];
 	if (isUpdatePosition) {
 		g_ixWordCurrent = ixWordUpdated;
-		g_ixWordListCurrent = ixWordListUpdated;
-		g_sWordCurrent = g_asWordList[g_ixWordCurrent];
+//		g_ixWordListCurrent = ixWordListUpdated;
+		g_sWordCurrent = vocab.asList[g_ixWordCurrent];
 		setCookie(g_sIxWordCookieName, g_ixWordCurrent);
 	}
 	return sWordCurrent;
@@ -397,10 +443,12 @@ function getNextWord(isUpdatePosition){
  * This means putting them into the current word list array param.
  */
 function initWordList(){
-	g_asWordList = aasWordLists[g_ixWordListCurrent];
+    /*
+    g_asWordList = vocab.asList[g_ixWordListCurrent];
 	for (var iW = 0; iW < g_asWordList.length; iW++) {
 		g_asWordList[iW] = g_asWordList[iW].split(" ").join("_");
 	}
+	*/
 }
 /**
  * Prepare the alphabet letters, so that they are easily obtained by other functions.
@@ -414,7 +462,7 @@ function showStartInfo(){
 	//sContent += "" + window.screen.width;
 	sOut += sContent;
 	sOut += "</div>";
-	g_divImg.innerHTML = sOut;
+	ui.divImg.innerHTML = sOut;
 }
 /**
  * Prepare the alphabet letters, so that they are easily obtained by
@@ -436,7 +484,7 @@ function cacheLetterImagesOnScreen(asLetters) {
 	for (var iL = 0; iL < asLetters.length; iL++) {
 		sOut += toImage(asLetters[iL]);
 	}
-	g_divBuffer.innerHTML = sOut;
+	ui.divBuffer.innerHTML = sOut;
 }
 /**
  * Convert a letter to HTML for rendering.
@@ -468,18 +516,10 @@ window.onkeydown = function(evt) {
 		doClickForward();
 		//console.log("g_phase = " +  g_phase)
 		if (g_phase == PHASE_ANSWER) {
-            setTimeout(
-                function() {
-                    doClickForward();
-                },
-                500
-            );
+            setTimeout( function() {
+                doClickForward();
+            }, 500 );
 		}
-    //} else if (key == 39) {
-    //    // right
-    //    evt.preventDefault();
-    //    //trace("111 right or space");
-    //    doClickForward();
 	} else if (key == 37) {
 		// left
 		evt.preventDefault();
@@ -501,24 +541,6 @@ window.onkeyup = function(evt) {
 	if ([32,37,38,39,40].includes(key)) {
         evt.preventDefault();
 	}
-	/*if (key == 38) {
-		// up
-        evt.preventDefault();
-		//trace("222 up");
-	} else if (key == 40) {
-		// down
-		evt.preventDefault();
-		//trace("222 down");
-	} else if ((key == 32) || (key == 39)) {
-		// right
-		evt.preventDefault();
-		//trace("222 right or space");
-	} else if (key == 37) {
-		// left
-		evt.preventDefault();
-		//trace("222 left");
-	}*/
-	//trace();
 	trace(key);
 }
 
@@ -564,15 +586,16 @@ handleMediaQueryChange(mediaQuery);
  * Set up the ui references get speed from cookie and show speed etc.
  */
 function doOnLoad(){
+    oCookie.init();
 	// Set up the UI elements for global use.
-	g_divSpeed = document.getElementById("speedDisplay");
-	g_divDebug = document.getElementById("debugDisplay");
-	g_divImg = document.getElementById("imgDisplay");
-	g_divBuffer = document.getElementById("imgBuffer");
-	g_btnFaster = document.getElementById("buttonFaster");
-	g_btnSlower = document.getElementById("buttonSlower");
-	g_btnRepeat = document.getElementById("buttonRepeat");
-	g_btnForward = document.getElementById("buttonForward");
+	ui.divSpeed = document.getElementById("divDisplay");
+	ui.divDebug = document.getElementById("divDebug");
+	ui.divImg = document.getElementById("imgDisplay");
+	ui.divBuffer = document.getElementById("imgBuffer");
+	ui.btnFaster = document.getElementById("buttonFaster");
+	ui.btnSlower = document.getElementById("buttonSlower");
+	ui.btnRepeat = document.getElementById("buttonRepeat");
+	ui.btnForward = document.getElementById("buttonForward");
 	// Display help information.
 	showStartInfo();
 	// Get cookie data, reset preferences.
