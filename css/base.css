@@ -31,6 +31,18 @@ button, .button {
     background-color: var(--color-blue85);
     cursor: pointer;
 }
+select {
+    background-color: #6d88dd;
+    padding: 9px;
+    font-size: 16px;
+    color: black;
+    border-radius: 5px;
+    border: none;
+    border-collapse: collapse;
+}
+select:focus {
+    outline: none;
+}
 .luminLetter {
 	color: white;
 	text-shadow: 0 0 3px #FFFFFF;
