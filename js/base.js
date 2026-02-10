@@ -3,7 +3,7 @@ var g_isDebug = false;
 var g_isMediaW375 = false;
 
 // speeds            1     2     3     4     5     6     7     8     9
-var g_aiSpeeds = [2000, 1400,  900,  700,  500,  450,  400,  350,  300]; // Millis to show letter.
+var g_aiSpeeds = [2000, 1400,  900,  800,  700,  600,  500,  400,  300]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
@@ -39,6 +39,7 @@ var PHASE_INIT = 0; // Just loaded, no action yet. No repeat possible.
 var PHASE_ANIM = 1; // Running the animation.
 var PHASE_ANSWER = 2; // Has run, and user has seen answer.
 var g_phase = PHASE_INIT;
+var asPhaseKey = ["INIT", "ANIM", "ANSWER", "(NONE)"];
 
 var g_sIxSpeedCookieName = "fingerSpell_ixCookieSpeed"; // Marker for ix of users chosen speed.
 var g_sIxWordCookieName = "fingerSpell_ixWord"; // Marker for ix of word-list.
@@ -156,6 +157,16 @@ function updateButtonStyleToVocabVowels(uiSrc=null) {
     }
     uiSrc.className = g_isVocabVowels ? "buttonFunction" : "buttonFunctionOff";
 }
+
+function doChangeVocab(selSrc) {
+    oCookie.setIdVocab(selSrc.value);
+    g_isVocabVowels = !g_isVocabVowels;
+
+    setCookie(g_sIsVocabVowelsCookieName, g_isVocabVowels.toString());
+
+}
+
+
 /**
  * Search through cookies and return value as an int.
  * If no value can be safely returned, return the default value.
@@ -515,10 +526,11 @@ window.onkeydown = function(evt) {
 		evt.preventDefault();
 		doClickForward();
 		//console.log("g_phase = " +  g_phase)
+		console.warn("g_phase " + asPhaseKey[g_phase]);
 		if (g_phase == PHASE_ANSWER) {
             setTimeout( function() {
                 doClickForward();
-            }, 500 );
+            }, 1000 );
 		}
 	} else if (key == 37) {
 		// left
