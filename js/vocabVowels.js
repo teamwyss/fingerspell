@@ -1,6 +1,6 @@
 const vocabVowels = {
     vocab: [],
-    iWordLength: 12,
+    iWordLength: 6,
     init: function() {
         this.vocab = this.generateVocab();
         return this;
