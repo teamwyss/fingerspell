@@ -2,8 +2,8 @@
 var g_isDebug = false;
 var g_isMediaW375 = false;
 
-// speeds            1     2     3     4     5     6     7     8     9
-var g_aiSpeeds = [2000, 1400,  900,  800,  700,  600,  500,  400,  300]; // Millis to show letter.
+// speeds            1     2     3     4     5     6     7     8     9   10   11
+var g_aiSpeeds = [2000, 1400,  900,  800,  700,  600,  500,  400,  300, 225, 175]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
@@ -129,12 +129,14 @@ function resumeSettings(){
 	g_iSpeed = g_aiSpeeds[g_ixSpeed];
 	// Resume Word-List from cookie via its ix.
 	g_isVocabVowels = getCookieAsBool(g_sIsVocabVowelsCookieName, false);
+	let uiSelVocab = document.querySelector("#selVocab");
+    uiSelVocab.value = "vocab" + (g_isVocabVowels ? "Vowels" : "Eng");
 	if (g_isVocabVowels) {
 	    vocabVowels.init();
 	    vocab.asList = vocabVowels.generateVocab();
 //        g_ixWordListCurrent = 0;
         g_ixWordCurrent = 0;
-        updateButtonStyleToVocabVowels();
+        //u pdateButtonStyleToVocabVowels();
 	} else {
         var iRandom = Math.round(Math.random() * 1000) % vocab.asList.length;
 //        g_ixWordListCurrent = getCookieAsInt(g_sIxWordListCookieName, iRandom);
@@ -148,22 +150,23 @@ function resumeSettings(){
 
 function doClickSwitchVocabVowels(uiSrc) {
     g_isVocabVowels = !g_isVocabVowels;
-    updateButtonStyleToVocabVowels(uiSrc);
+    //u pdateButtonStyleToVocabVowels(uiSrc);
     setCookie(g_sIsVocabVowelsCookieName, g_isVocabVowels.toString());
+    location.reload();
 }
-function updateButtonStyleToVocabVowels(uiSrc=null) {
+/*
+function u pdateButtonStyleToVocabVowels(uiSrc=null) {
     if (uiSrc === null) {
         uiSrc = document.querySelector("#buttonVocabVowels");
     }
     uiSrc.className = g_isVocabVowels ? "buttonFunction" : "buttonFunctionOff";
 }
-
+*/
 function doChangeVocab(selSrc) {
     oCookie.setIdVocab(selSrc.value);
     g_isVocabVowels = !g_isVocabVowels;
-
     setCookie(g_sIsVocabVowelsCookieName, g_isVocabVowels.toString());
-
+    location.reload();
 }
 
 
