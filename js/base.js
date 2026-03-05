@@ -394,7 +394,6 @@ function doClickForward() {
 }
 function doClickForwardDouble() {
     doClickForward();
-    //console.log("g_phase = " +  g_phase)
     console.warn("g_phase " + asPhaseKey[g_phase]);
     if (g_phase == PHASE_ANSWER) {
         setTimeout( function() {
