@@ -373,7 +373,7 @@ function doClickRepeat(){
  * Move forward. This either means show the answer of the current
  * animation, or go to next word.
  */
-function doClickForward(){
+function doClickForward() {
 	g_iWordCurrentRepeats = 0;
 	peekNextWord();
 	if((g_phase == PHASE_INIT) || (g_phase == PHASE_ANSWER)){
@@ -391,6 +391,16 @@ function doClickForward(){
         scoreboard.addWord();
 	}
 	flashClick(ui.btnForward);
+}
+function doClickForwardDouble() {
+    doClickForward();
+    //console.log("g_phase = " +  g_phase)
+    console.warn("g_phase " + asPhaseKey[g_phase]);
+    if (g_phase == PHASE_ANSWER) {
+        setTimeout( function() {
+            doClickForward();
+        }, 1000 );
+    }
 }
 function flashClick(btn){
 	btn.style.backgroundColor = "#bfcfff";
@@ -423,30 +433,15 @@ function peekNextWord(sWordToPeek=null){
 	cacheLetterImagesOnScreen(getLetterArrayFromWord(sWordToPeek));
 }
 function getNextWord(isUpdatePosition=true) {
-//	if (typeof isUpdatePosition == "undefined") {
-//		isUpdatePosition = true;
-//	}
 	var ixWordUpdated = g_ixWordCurrent + 1;
-	//var ixWordListUpdated = g_ixWordListCurrent;
-	//var asWordListUpdated = vocab.asList;
-//	if (ixWordUpdated >= asWordListUpdated.length) {
 	if (ixWordUpdated >= vocab.asList.length) {
-		// Need to move to next list.
 		ixWordUpdated = 0;
-		//ixWordListUpdated = ixWordListUpdated + 1;
-		//if(ixWordListUpdated >= vocab.asList.length){
-		//	ixWordListUpdated = 0;
-		//}
-		//asWordListUpdated = vocab.asList[ixWordListUpdated];
-		// We have changed word lists, update the list cookie.
-		//if (isUpdatePosition) {
-		//	vocab.asList = asWordListUpdated;
-		//setCookie(g_sIxWordListCookieName, ixWordListUpdated);
 	}
+	//trace();
+	//trace("ix of next word: " + ixWordUpdated);
 	var sWordCurrent = vocab.asList[ixWordUpdated];
 	if (isUpdatePosition) {
 		g_ixWordCurrent = ixWordUpdated;
-//		g_ixWordListCurrent = ixWordListUpdated;
 		g_sWordCurrent = vocab.asList[g_ixWordCurrent];
 		setCookie(g_sIxWordCookieName, g_ixWordCurrent);
 	}
@@ -527,7 +522,8 @@ window.onkeydown = function(evt) {
 	} else if ((key == 32) || (key == 39)) {
 		// 32=space 39=right.
 		evt.preventDefault();
-		doClickForward();
+		doClickForwardDouble();
+        /*
 		//console.log("g_phase = " +  g_phase)
 		console.warn("g_phase " + asPhaseKey[g_phase]);
 		if (g_phase == PHASE_ANSWER) {
@@ -535,6 +531,7 @@ window.onkeydown = function(evt) {
                 doClickForward();
             }, 1000 );
 		}
+        */
 	} else if (key == 37) {
 		// left
 		evt.preventDefault();
