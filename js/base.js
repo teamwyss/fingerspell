@@ -2,8 +2,8 @@
 var g_isDebug = false;
 var g_isMediaW375 = false;
 
-// speeds            1     2     3     4     5     6     7     8     9   10   11
-var g_aiSpeeds = [2000, 1400,  900,  800,  700,  600,  500,  400,  300, 225, 175]; // Millis to show letter.
+// speeds            1     2     3     4     5     6     7     8     9   10   11   12
+var g_aiSpeeds = [2000, 1400,  900,  800,  700,  600,  500,  400,  360, 320, 300, 290]; // Millis to show letter.
 var g_ixSpeed = 6; // Index of the speed settings.
 var g_iSpeed = g_aiSpeeds[g_ixSpeed]; // Speed in milis for letter.
 var g_ixWordListCurrent = 0; // Which word-list is used
@@ -365,10 +365,25 @@ function doClickRepeat(){
 		return;
 	}
 	g_iWordCurrentRepeats++;
+    //insertCurrentWordAFewPositionsAhead();
 	animateWord();
 	flashClick(ui.btnRepeat);
     scoreboard.addRepeat();
 }
+/*
+ * Honestly, I found this really annoying.
+ * Removed.
+function insertCurrentWordAFewPositionsAhead() {
+    if (g_iWordCurrentRepeats > 3) {
+        return;
+    }
+    let sThisWord = vocab.asList[g_ixWordCurrent];
+    let iDistanceAhead = Math.min(((g_iWordCurrentRepeats ** 3) + 5), 40);
+    let ixTarget = (g_ixWordCurrent + iDistanceAhead) % vocab.asList.length;
+    vocab.asList.splice(ixTarget, 0, sThisWord);
+    console.log("Pos now: " + g_ixWordCurrent + ". Duplicate of " + sThisWord + " inserted at: " + iDistanceAhead + " places ahead at " + ixTarget + ".");
+}
+*/
 /**
  * Move forward. This either means show the answer of the current
  * animation, or go to next word.
@@ -394,7 +409,7 @@ function doClickForward() {
 }
 function doClickForwardDouble() {
     doClickForward();
-    console.warn("g_phase " + asPhaseKey[g_phase]);
+    // console.warn("g_phase " + asPhaseKey[g_phase]);
     if (g_phase == PHASE_ANSWER) {
         setTimeout( function() {
             doClickForward();
@@ -549,7 +564,7 @@ window.onkeyup = function(evt) {
 	 * Only these ones have an effect on the UI.
 	 * window.onkeydown() does the work.
 	 */
-	if ([32,37,38,39,40].includes(key)) {
+	if ([32, 37, 38, 39, 40].includes(key)) {
         evt.preventDefault();
 	}
 	trace(key);
